@@ -47,7 +47,7 @@ export const Header = () => {
                     left: isOpen ? '0' : '-9999px',
                     width: '100%',
                     textAlign: isOpen ? 'left' : 'center',
-                    padding: isOpen ? '16px 24px' : '0', 
+                    padding: isOpen ? '16px 30px' : '0', 
                     top: '40px',
                 }}>
                 <ul className="md:flex md:items-center md:justify-between">
@@ -65,9 +65,6 @@ export const Header = () => {
                     </li>
                     <li className="md:mx-2 my-2 md:my-0">
                         <Link to="/register" className="block md:inline-block px-2 hover:text-gray-300 duration-500">Register</Link>
-                    </li>
-                    <li className="md:mx-2 my-2 md:my-0">
-                        <button className="block md:inline-block bg-gray-900 text-gray-300 duration-500 px-2 py-2 mx-2 hover:bg-gray-700 rounded width-100 md:w-auto">Get Started</button>
                     </li>
                 </ul>
             </nav>
