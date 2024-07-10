@@ -27,7 +27,7 @@ export const Header = () => {
 
     return (
         <header className="p-1 bg-gray-800 text-white shadow md:flex md:items-center md:justify-between">
-            <div className="px-2 py-1 flex justify-between items-center w-full mx-6">
+            <div className="px-2 pr-10 py-1 flex justify-between items-center w-full mx-6">
                 <Link to="/" className="text-xl"> 
                     Task Manager
                 </Link>
