@@ -33,7 +33,7 @@ const Profile = () => {
   
     return (
       <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
-        <div className="max-w-md w-full space-y-8 relative">
+        <div className="max-w-md w-full space-y-8 relative bg-gray-300 p-6 rounded-3xl">
           <ProfileHeader user={user} />
           <ProfileDetails user = {user}/>
           
