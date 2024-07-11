@@ -26,7 +26,7 @@ export const Header = () => {
     };
 
     return (
-        <header className="p-1 bg-gray-800 text-white shadow md:flex md:items-center md:justify-between">
+        <header className="p-1 bg-gray-800 text-white shadow md:flex md:items-center md:justify-between sticky top-0 z-50">
             <div className="px-2 pr-10 py-1 flex justify-between items-center w-full mx-6">
                 <Link to="/" className="text-xl"> 
                     Task Manager
@@ -41,14 +41,14 @@ export const Header = () => {
                     </button>
                 </div>
             </div>
-            <nav className={`md:flex md:items-center md:justify-between bg-gray-800 md:bg-transparent md:static absolute left-0 w-full md:w-auto py-2 md:py-0 transition-all ease-in-out duration-500 ${isOpen ? 'block opacity-100 top-16' : 'hidden opacity-0 top-[-400px]'}`}
+            <nav className={`md:flex md:items-center md:justify-between bg-gray-800 md:bg-transparent md:static absolute left-0 w-full md:w-auto py-2 md:py-0 transition-all ease-in-out duration-500 z-50 ${isOpen ? 'block opacity-100 top-16' : 'hidden opacity-0 top-[-400px]'}`}
                 style={{
-                    maxHeight: '100vh',
+                    maxHeight: 'calc(100vh - 64px)', // Adjust if you have a different header height
                     left: isOpen ? '0' : '-9999px',
                     width: '100%',
                     textAlign: isOpen ? 'left' : 'center',
-                    padding: isOpen ? '16px 30px' : '0', 
-                    top: '40px',
+                    padding: isOpen ? '16px 30px' : '0',
+                    top: '40px', // Adjust based on your header height
                 }}>
                 <ul className="md:flex md:items-center md:justify-between">
                     <li className="md:mx-2 my-2 md:my-0"> 

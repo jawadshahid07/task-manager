@@ -4,10 +4,11 @@ const TaskForm = ({ task = {}, onSubmit, onCancel }) => {
   const [title, setTitle] = useState(task.title || '');
   const [description, setDescription] = useState(task.description || '');
   const [date, setDate] = useState(task.date || '');
+  const [priority, setPriority] = useState(task.priority || '');
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit({ ...task, title, description, date });
+    onSubmit({ ...task, title, description, date, priority });
   };
 
   return (
@@ -36,6 +37,20 @@ const TaskForm = ({ task = {}, onSubmit, onCancel }) => {
               className="w-full p-2 border border-gray-300 rounded mt-1"
               required
             ></textarea>
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700">Priority</label>
+            <select
+              name="priority"
+              value={priority}
+              onChange={(e) => setPriority(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded mt-1"
+              required
+            >
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+          </select>
           </div>
           <div className="mb-4">
             <label className="block text-gray-700">Date</label>
