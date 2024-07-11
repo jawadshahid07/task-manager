@@ -55,7 +55,7 @@ const Tasks = () => {
 
   const handleFilterChange = (newFilter) => {
     setFilter(newFilter);
-    setCurrentPage(1); // Reset to first page on filter change
+    setCurrentPage(1); 
   };
 
   return (
