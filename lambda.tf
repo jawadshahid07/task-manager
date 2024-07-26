@@ -60,3 +60,25 @@ resource "aws_lambda_function" "get_tasks" {
     }
   }
 }
+
+# Allow API Gateway to invoke the add_task Lambda function
+resource "aws_lambda_permission" "allow_api_gateway_add_task" {
+  statement_id  = "AllowExecutionFromAPIGatewayAddTask"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.add_task.function_name
+  principal     = "apigateway.amazonaws.com"
+
+  # Construct the source ARN dynamically
+  source_arn = "arn:aws:execute-api:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.task_api.id}/*/POST/task"
+}
+
+# Allow API Gateway to invoke the get_tasks Lambda function
+resource "aws_lambda_permission" "allow_api_gateway_get_tasks" {
+  statement_id  = "AllowExecutionFromAPIGatewayGetTasks"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.get_tasks.function_name
+  principal     = "apigateway.amazonaws.com"
+
+  # Construct the source ARN dynamically
+  source_arn = "arn:aws:execute-api:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.task_api.id}/*/GET/task"
+}
