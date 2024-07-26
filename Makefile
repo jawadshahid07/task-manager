@@ -5,4 +5,4 @@ deploy-infra:
 	terraform apply -auto-approve
 
 deploy-site:
-	cd task_manager_app && npm run build && aws s3 sync ./build s3://my-task-management-app-2024
+	cd task_manager_app && npm run build && aws s3 sync ./build s3://jawad-task-management-app-2024
