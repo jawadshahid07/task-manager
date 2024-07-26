@@ -1,19 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Task from '../../components/Task';
 import TaskForm from '../../components/TaskForm';
 import Pagination from '../../components/Pagination';
 import { PlusIcon } from '@heroicons/react/outline';
+import axios from 'axios';
 
 const Tasks = () => {
-  const [tasks, setTasks] = useState([
-    { id: 1, title: 'Task 1', description: 'Description of Task 1', date: '2024-07-01', completed: false, priority: 'medium' },
-    { id: 2, title: 'Task 2', description: 'Description of Task 2', date: '2024-07-02', completed: false, priority: 'low' },
-    { id: 3, title: 'Task 3', description: 'Description of Task 3', date: '2024-07-02', completed: false, priority: 'high' },
-    // Add more tasks as needed
-  ]);
+  const [tasks, setTasks] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [filter, setFilter] = useState('all');
   const tasksPerPage = 12;
+
+  const getApiEndpoint = 'https://8kv6z33bj8.execute-api.us-east-1.amazonaws.com/prod/task';
+  const postApiEndpoint = 'https://8kv6z33bj8.execute-api.us-east-1.amazonaws.com/prod/task';
 
   const indexOfLastTask = currentPage * tasksPerPage;
   const indexOfFirstTask = indexOfLastTask - tasksPerPage;
@@ -33,9 +32,28 @@ const Tasks = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [currentTask, setCurrentTask] = useState(null);
 
-  const handleCreate = (task) => {
-    setTasks([...tasks, { id: tasks.length + 1, ...task, completed: false }]);
-    setIsCreating(false);
+  useEffect(() => {
+    // Fetch tasks from the GET API
+    const fetchTasks = async () => {
+      try {
+        const response = await axios.get(getApiEndpoint);
+        setTasks(response.data);
+      } catch (error) {
+        console.error('Error fetching tasks:', error);
+      }
+    };
+
+    fetchTasks();
+  }, []);
+
+  const handleCreate = async (task) => {
+    try {
+      const response = await axios.post(postApiEndpoint, task);
+      setTasks([...tasks, response.data]);
+      setIsCreating(false);
+    } catch (error) {
+      console.error('Error creating task:', error);
+    }
   };
 
   const handleEdit = (task) => {
