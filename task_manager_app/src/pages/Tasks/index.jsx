@@ -11,8 +11,8 @@ const Tasks = () => {
   const [filter, setFilter] = useState('all');
   const tasksPerPage = 12;
 
-  const getApiEndpoint = 'https://8kv6z33bj8.execute-api.us-east-1.amazonaws.com/prod/task';
-  const postApiEndpoint = 'https://8kv6z33bj8.execute-api.us-east-1.amazonaws.com/prod/task';
+  const getApiEndpoint = 'https://h7xhn641v2.execute-api.us-east-1.amazonaws.com/prod/getTasks';
+  const postApiEndpoint = 'https://h7xhn641v2.execute-api.us-east-1.amazonaws.com/prod/addTask';
 
   const indexOfLastTask = currentPage * tasksPerPage;
   const indexOfFirstTask = indexOfLastTask - tasksPerPage;
@@ -37,24 +37,50 @@ const Tasks = () => {
     const fetchTasks = async () => {
       try {
         const response = await axios.get(getApiEndpoint);
-        setTasks(response.data);
+        
+        // Transform the response data to fit the expected format
+        const tasks = response.data.map(task => ({
+          id: task.id.S,
+          title: task.title.S,
+          description: task.description.S,
+          date: task.date.S,
+          priority: task.priority.S,
+          completed: task.completed.BOOL
+        }));
+  
+        setTasks(tasks);
       } catch (error) {
         console.error('Error fetching tasks:', error);
       }
     };
-
+  
     fetchTasks();
   }, []);
-
+  
   const handleCreate = async (task) => {
     try {
-      const response = await axios.post(postApiEndpoint, task);
-      setTasks([...tasks, response.data]);
+      // Transform task data to fit backend format
+      const taskToSend = {
+        id: task.id,
+        title: task.title,
+        description: task.description,
+        date: task.date,
+        priority: task.priority,
+        completed: task.completed
+      };
+  
+      const response = await axios.post(postApiEndpoint, taskToSend);
+      
+      // Transform the response if necessary
+      const newTask = response.data; // Adjust based on the actual response format
+  
+      setTasks([...tasks, newTask]);
       setIsCreating(false);
     } catch (error) {
       console.error('Error creating task:', error);
     }
   };
+  
 
   const handleEdit = (task) => {
     setTasks(tasks.map(t => (t.id === task.id ? task : t)));

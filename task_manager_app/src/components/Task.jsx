@@ -6,14 +6,15 @@ const Task = ({ task, onEdit, onDelete, onComplete }) => {
 
   const today = new Date().toISOString().split('T')[0];
 
+  // Ensure taskStatusColor is correctly assigned based on task.completed and task.date
   const taskStatusColor = task.completed
     ? 'bg-green-500'
     : task.date < today
     ? 'bg-red-500'
     : 'bg-yellow-500';
 
-  // Ensure task.priority is defined; if not, default to 'medium'
-  const priority = {
+  // Define priority settings and handle default values
+  const prioritySettings = {
     low: {
       text: 'LOW PRIORITY',
       color: 'text-black',
@@ -29,7 +30,10 @@ const Task = ({ task, onEdit, onDelete, onComplete }) => {
       color: 'text-red-500',
       arrows: '>>>'
     }
-  }[task.priority || 'medium']; // Default to 'medium' if task.priority is undefined
+  };
+
+  // Default to 'medium' priority if task.priority is undefined or invalid
+  const priority = prioritySettings[task.priority] || prioritySettings['medium'];
 
   const formattedDate = new Date(task.date).toLocaleDateString('en-GB', {
     day: '2-digit',

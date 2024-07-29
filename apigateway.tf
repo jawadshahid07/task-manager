@@ -1,119 +1,205 @@
-# Define the API Gateway REST API
-resource "aws_api_gateway_rest_api" "task_api" {
-  name        = "TaskAPI"
-  description = "API for task management"
+# Create the API Gateway REST API
+resource "aws_api_gateway_rest_api" "tasks_api" {
+  name        = "TasksApi"
+  description = "API for managing tasks"
 }
 
-# Define the API Gateway resource (e.g., /task)
-resource "aws_api_gateway_resource" "task" {
-  rest_api_id = aws_api_gateway_rest_api.task_api.id
-  parent_id   = aws_api_gateway_rest_api.task_api.root_resource_id
-  path_part   = "task"
+# Create the /getTasks resource
+resource "aws_api_gateway_resource" "get_tasks_resource" {
+  rest_api_id = aws_api_gateway_rest_api.tasks_api.id
+  parent_id   = aws_api_gateway_rest_api.tasks_api.root_resource_id
+  path_part   = "getTasks"
 }
 
-# Define the POST method for the API Gateway
-resource "aws_api_gateway_method" "add_task" {
-  rest_api_id   = aws_api_gateway_rest_api.task_api.id
-  resource_id   = aws_api_gateway_resource.task.id
-  http_method   = "POST"
-  authorization = "NONE"
+# Create the /addTask resource
+resource "aws_api_gateway_resource" "add_task_resource" {
+  rest_api_id = aws_api_gateway_rest_api.tasks_api.id
+  parent_id   = aws_api_gateway_rest_api.tasks_api.root_resource_id
+  path_part   = "addTask"
 }
 
-# Define the integration for the POST method
-resource "aws_api_gateway_integration" "add_task" {
-  rest_api_id             = aws_api_gateway_rest_api.task_api.id
-  resource_id             = aws_api_gateway_resource.task.id
-  http_method             = aws_api_gateway_method.add_task.http_method
-  integration_http_method = "POST"
-  type                    = "AWS_PROXY"
-  uri                     = aws_lambda_function.add_task.invoke_arn
-}
-
-# Define the GET method for the API Gateway
-resource "aws_api_gateway_method" "get_tasks" {
-  rest_api_id   = aws_api_gateway_rest_api.task_api.id
-  resource_id   = aws_api_gateway_resource.task.id
+# Create the GET method for /getTasks
+resource "aws_api_gateway_method" "get_tasks_method" {
+  rest_api_id   = aws_api_gateway_rest_api.tasks_api.id
+  resource_id   = aws_api_gateway_resource.get_tasks_resource.id
   http_method   = "GET"
   authorization = "NONE"
 }
 
-# Define the integration for the GET method
-resource "aws_api_gateway_integration" "get_tasks" {
-  rest_api_id             = aws_api_gateway_rest_api.task_api.id
-  resource_id             = aws_api_gateway_resource.task.id
-  http_method             = aws_api_gateway_method.get_tasks.http_method
-  integration_http_method = "POST"
-  type                    = "AWS_PROXY"
-  uri                     = aws_lambda_function.get_tasks.invoke_arn
+# Create the POST method for /addTask
+resource "aws_api_gateway_method" "add_task_method" {
+  rest_api_id   = aws_api_gateway_rest_api.tasks_api.id
+  resource_id   = aws_api_gateway_resource.add_task_resource.id
+  http_method   = "POST"
+  authorization = "NONE"
 }
 
-# Define the OPTIONS method for CORS
-resource "aws_api_gateway_method" "options" {
-  rest_api_id   = aws_api_gateway_rest_api.task_api.id
-  resource_id   = aws_api_gateway_resource.task.id
+# Set up the integration for /getTasks
+resource "aws_api_gateway_integration" "get_tasks_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.tasks_api.id
+  resource_id             = aws_api_gateway_resource.get_tasks_resource.id
+  http_method             = aws_api_gateway_method.get_tasks_method.http_method
+  type                    = "AWS_PROXY"
+  integration_http_method = "POST"
+  uri                     = aws_lambda_function.get_tasks_function.invoke_arn
+}
+
+# Set up the integration for /addTask
+resource "aws_api_gateway_integration" "add_task_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.tasks_api.id
+  resource_id             = aws_api_gateway_resource.add_task_resource.id
+  http_method             = aws_api_gateway_method.add_task_method.http_method
+  type                    = "AWS_PROXY"
+  integration_http_method = "POST"
+  uri                     = aws_lambda_function.add_task_function.invoke_arn
+}
+
+# Grant API Gateway permission to invoke the getTasks Lambda function
+resource "aws_lambda_permission" "get_tasks_permission" {
+  statement_id  = "AllowAPIGatewayInvokeGetTasks"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.get_tasks_function.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_api_gateway_rest_api.tasks_api.execution_arn}/*/*"
+}
+
+# Grant API Gateway permission to invoke the addTask Lambda function
+resource "aws_lambda_permission" "add_task_permission" {
+  statement_id  = "AllowAPIGatewayInvokeAddTask"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.add_task_function.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_api_gateway_rest_api.tasks_api.execution_arn}/*/*"
+}
+
+# Create the OPTIONS method for /getTasks to handle CORS preflight requests
+resource "aws_api_gateway_method" "get_tasks_options_method" {
+  rest_api_id   = aws_api_gateway_rest_api.tasks_api.id
+  resource_id   = aws_api_gateway_resource.get_tasks_resource.id
   http_method   = "OPTIONS"
   authorization = "NONE"
 }
 
-resource "aws_api_gateway_integration" "options" {
-  rest_api_id = aws_api_gateway_rest_api.task_api.id
-  resource_id = aws_api_gateway_resource.task.id
-  http_method = aws_api_gateway_method.options.http_method
-  type        = "MOCK"
+resource "aws_api_gateway_integration" "get_tasks_options_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.tasks_api.id
+  resource_id             = aws_api_gateway_resource.get_tasks_resource.id
+  http_method             = aws_api_gateway_method.get_tasks_options_method.http_method
+  type                    = "MOCK"
+  request_templates       = {
+    "application/json" = "{\"statusCode\": 200}"
+  }
 }
 
-resource "aws_api_gateway_method_response" "options" {
-  rest_api_id = aws_api_gateway_rest_api.task_api.id
-  resource_id = aws_api_gateway_resource.task.id
-  http_method = aws_api_gateway_method.options.http_method
+resource "aws_api_gateway_method_response" "get_tasks_options_method_response" {
+  rest_api_id = aws_api_gateway_rest_api.tasks_api.id
+  resource_id = aws_api_gateway_resource.get_tasks_resource.id
+  http_method = aws_api_gateway_method.get_tasks_options_method.http_method
   status_code = "200"
-
-  response_models = {
-    "application/json" = "Empty"
-  }
-
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers" = true
-    "method.response.header.Access-Control-Allow-Methods" = true
+    "method.response.header.Access-Control-Allow-Headers" = true,
+    "method.response.header.Access-Control-Allow-Methods" = true,
     "method.response.header.Access-Control-Allow-Origin"  = true
   }
 }
 
-resource "aws_api_gateway_integration_response" "options" {
-  rest_api_id = aws_api_gateway_rest_api.task_api.id
-  resource_id = aws_api_gateway_resource.task.id
-  http_method = aws_api_gateway_method.options.http_method
-  status_code = aws_api_gateway_method_response.options.status_code
-
-  response_templates = {
-    "application/json" = ""
-  }
-
+resource "aws_api_gateway_integration_response" "get_tasks_options_integration_response" {
+  rest_api_id = aws_api_gateway_rest_api.tasks_api.id
+  resource_id = aws_api_gateway_resource.get_tasks_resource.id
+  http_method = aws_api_gateway_method.get_tasks_options_method.http_method
+  status_code = aws_api_gateway_method_response.get_tasks_options_method_response.status_code
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-    "method.response.header.Access-Control-Allow-Methods" = "'GET,POST,OPTIONS'"
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+    "method.response.header.Access-Control-Allow-Methods" = "'GET,POST,OPTIONS'",
     "method.response.header.Access-Control-Allow-Origin"  = "'*'"
   }
 }
 
-# Define the deployment for the API Gateway
-resource "aws_api_gateway_deployment" "api_deployment" {
-  rest_api_id = aws_api_gateway_rest_api.task_api.id
-  stage_name  = "prod"
-
-  depends_on = [
-    aws_api_gateway_integration.add_task,
-    aws_api_gateway_integration.get_tasks,
-    aws_api_gateway_integration.options
-  ]
+# Create the OPTIONS method for /addTask to handle CORS preflight requests
+resource "aws_api_gateway_method" "add_task_options_method" {
+  rest_api_id   = aws_api_gateway_rest_api.tasks_api.id
+  resource_id   = aws_api_gateway_resource.add_task_resource.id
+  http_method   = "OPTIONS"
+  authorization = "NONE"
 }
 
-# Output the API URL
-output "api_url" {
-  value = "https://${aws_api_gateway_rest_api.task_api.id}.execute-api.${data.aws_region.current.name}.amazonaws.com/prod/task"
+resource "aws_api_gateway_integration" "add_task_options_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.tasks_api.id
+  resource_id             = aws_api_gateway_resource.add_task_resource.id
+  http_method             = aws_api_gateway_method.add_task_options_method.http_method
+  type                    = "MOCK"
+  request_templates       = {
+    "application/json" = "{\"statusCode\": 200}"
+  }
 }
 
-# Data sources to fetch current AWS region and account ID
-data "aws_region" "current" {}
+resource "aws_api_gateway_method_response" "add_task_options_method_response" {
+  rest_api_id = aws_api_gateway_rest_api.tasks_api.id
+  resource_id = aws_api_gateway_resource.add_task_resource.id
+  http_method = aws_api_gateway_method.add_task_options_method.http_method
+  status_code = "200"
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = true,
+    "method.response.header.Access-Control-Allow-Methods" = true,
+    "method.response.header.Access-Control-Allow-Origin"  = true
+  }
+}
 
-data "aws_caller_identity" "current" {}
+resource "aws_api_gateway_integration_response" "add_task_options_integration_response" {
+  rest_api_id = aws_api_gateway_rest_api.tasks_api.id
+  resource_id = aws_api_gateway_resource.add_task_resource.id
+  http_method = aws_api_gateway_method.add_task_options_method.http_method
+  status_code = aws_api_gateway_method_response.add_task_options_method_response.status_code
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+    "method.response.header.Access-Control-Allow-Methods" = "'GET,POST,OPTIONS'",
+    "method.response.header.Access-Control-Allow-Origin"  = "'*'"
+  }
+}
+
+# Set up the method response and integration response for GET /getTasks
+resource "aws_api_gateway_method_response" "get_tasks_method_response" {
+  rest_api_id = aws_api_gateway_rest_api.tasks_api.id
+  resource_id = aws_api_gateway_resource.get_tasks_resource.id
+  http_method = aws_api_gateway_method.get_tasks_method.http_method
+  status_code = "200"
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin" = true
+  }
+}
+
+resource "aws_api_gateway_integration_response" "get_tasks_integration_response" {
+  rest_api_id = aws_api_gateway_rest_api.tasks_api.id
+  resource_id = aws_api_gateway_resource.get_tasks_resource.id
+  http_method = aws_api_gateway_method.get_tasks_method.http_method
+  status_code = aws_api_gateway_method_response.get_tasks_method_response.status_code
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin" = "'*'"
+  }
+  response_templates = {
+    "application/json" = ""
+  }
+}
+
+# Set up the method response and integration response for POST /addTask
+resource "aws_api_gateway_method_response" "add_task_method_response" {
+  rest_api_id = aws_api_gateway_rest_api.tasks_api.id
+  resource_id = aws_api_gateway_resource.add_task_resource.id
+  http_method = aws_api_gateway_method.add_task_method.http_method
+  status_code = "200"
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin" = true
+  }
+}
+
+resource "aws_api_gateway_integration_response" "add_task_integration_response" {
+  rest_api_id = aws_api_gateway_rest_api.tasks_api.id
+  resource_id = aws_api_gateway_resource.add_task_resource.id
+  http_method = aws_api_gateway_method.add_task_method.http_method
+  status_code = aws_api_gateway_method_response.add_task_method_response.status_code
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin" = "'*'"
+  }
+  response_templates = {
+    "application/json" = ""
+  }
+}
